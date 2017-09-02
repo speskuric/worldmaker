@@ -61,7 +61,7 @@ namespace WorldMaker.ui
         Brush selectedBrush = Brushes.Red;
         private const double selectionPixelDistance = 5;
         private List<WorldPoint> selection = new List<WorldPoint>();
-        private List<LineGraph> linesWhichHaveSelectedPoints = new List<LineGraph>();
+        private List<int> selectionIndices = new List<int>();
 
         private List<WorldAction> actionList = new List<WorldAction>();
         private int actionIndex = 0;
@@ -142,7 +142,7 @@ namespace WorldMaker.ui
 
             WorldRectangle bounds = lineGraph.Bounds;
             Rectangle screenRect = worldToScreen(bounds);
-            g.DrawRectangle(Pens.White, screenRect);
+            g.DrawRectangle(Pens.LightPink, screenRect);
 
             WorldPoint previous = null;
             int previousScreenX = -1;
@@ -205,14 +205,14 @@ namespace WorldMaker.ui
                 {
                     case ActionType.FreeDraw:
                     case ActionType.PointDraw:
-                        foreach(LineGraph line in action.Lines){
-                            world.Lines.Remove(line);
-                        }
-                        
+                        world.Lines.Remove(action.Line);
                         break;
                     case ActionType.Delete:
-                        //TODO OMG make deletes remember the line and index of the point
-                            //world.Lines.AddRange(action.Points);
+                        for (int i = 0; i < action.Points.Count; i++)
+                        {
+                            WorldPoint point = action.Points[i];
+                            point.Parent.Insert(point, action.PointIndices[i]);
+                        }
                         break;
                     case ActionType.MoveSelection:
                         foreach (WorldPoint point in action.Points)
@@ -235,12 +235,13 @@ namespace WorldMaker.ui
                 {
                     case ActionType.FreeDraw:
                     case ActionType.PointDraw:
-                        world.Lines.AddRange(action.Lines);
+                        world.Lines.Add(action.Line);
                         break;
                     case ActionType.Delete:
-                        foreach (LineGraph line in action.Lines)
+                        for (int i = action.Points.Count - 1; i >= 0; i--)
                         {
-                            world.Lines.Remove(line);
+                            WorldPoint point = action.Points[i];
+                            point.Parent.RemoveAt(action.PointIndices[i]);
                         }
                         break;
                     case ActionType.MoveSelection:
@@ -419,7 +420,7 @@ namespace WorldMaker.ui
         {
             if (selection.Count > 0)
             {
-                WorldAction action = new WorldAction(ActionType.Delete, new List<LineGraph>(), selection);
+                WorldAction action = new WorldAction(ActionType.Delete, selection, selectionIndices);
                 add(action);
                 for (int i = 0; i < world.Lines.Count; i++)
                 {
@@ -496,25 +497,28 @@ namespace WorldMaker.ui
                 if (!selection.Contains(closestPoint))
                 {
                     selection.Clear();
-                    linesWhichHaveSelectedPoints.Clear();
+                    selectionIndices.Clear();
                     selection.Add(closestPoint);
-                    linesWhichHaveSelectedPoints.Add(closestPointsLine);
+                    selectionIndices.Add(closestPoint.getIndex());
                 }
                 currentAction = ActionType.MoveSelection;
             }
             else if(closestLine != null)
             {
                 selection.Clear();
-                linesWhichHaveSelectedPoints.Clear();
-                foreach (WorldPoint point in closestLine) selection.Add(point);
-                linesWhichHaveSelectedPoints.Add(closestLine);
+                selectionIndices.Clear();
+                for (int i = 0; i < closestLine.Count; i++)
+                {
+                    selection.Add(closestLine[i]);
+                    selectionIndices.Add(i);
+                }
                 currentAction = ActionType.MoveSelection;
             }
         }
         private void selectActionMouseUp(MouseEventArgs e)
         {
             selection.Clear();
-            linesWhichHaveSelectedPoints.Clear();
+            selectionIndices.Clear();
             double x1 = Math.Min(mouseDownWorldX, mouseWorldX);
             double x2 = Math.Max(mouseDownWorldX, mouseWorldX);
             double y1 = Math.Min(mouseDownWorldY, mouseWorldY);
@@ -522,13 +526,13 @@ namespace WorldMaker.ui
 
             foreach (LineGraph graph in world.Lines)
             {
-                foreach (WorldPoint point in graph)
+                for (int i = 0; i < graph.Count; i++)
                 {
+                    WorldPoint point = graph[i];
                     if (point.X >= x1 && point.X <= x2 && point.Y >= y1 && point.Y <= y2)
                     {
                         selection.Add(point);
-                        if (!linesWhichHaveSelectedPoints.Contains(graph))
-                            linesWhichHaveSelectedPoints.Add(graph);
+                        selectionIndices.Add(i);
                     }
                 }
             }
@@ -544,13 +548,15 @@ namespace WorldMaker.ui
         {
             double dx = mouseWorldX - mouseDownWorldX;
             double dy = mouseWorldY - mouseDownWorldY;
+            HashSet<LineGraph> affectedLines = new HashSet<LineGraph>();
             foreach (WorldPoint point in selection)
             {
                 point.X += dx;
                 point.Y += dy;
+                if(point.Parent != null) affectedLines.Add(point.Parent);
             }
-            foreach (LineGraph line in linesWhichHaveSelectedPoints) line.RecalculateBounds();
-            WorldAction action = new WorldAction(ActionType.MoveSelection, new List<LineGraph>(), selection, dx, dy);
+            foreach (LineGraph line in affectedLines) line.RecalculateBounds();
+            WorldAction action = new WorldAction(ActionType.MoveSelection, selection, dx, dy);
             add(action);
             currentAction = ActionType.None;
         }

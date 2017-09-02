@@ -53,15 +53,41 @@ namespace WorldMaker
             }
         }
 
+        public int IndexOf(WorldPoint point)
+        {
+            return points.IndexOf(point);
+        }
+
         public void Add(double x, double y)
         {
-            stretchBounds(x, y);
-            points.Add(new WorldPoint(x, y));
+            Add(new WorldPoint(x, y, this));
+        }
+
+        public void Insert(double x, double y, int index)
+        {
+            Insert(new WorldPoint(x, y, this), index);
+        }
+
+        public void Add(WorldPoint point)
+        {
+            stretchBounds(point.X, point.Y);
+            points.Add(point);
+        }
+
+        public void Insert(WorldPoint point, int index)
+        {
+            stretchBounds(point.X, point.Y);
+            points.Insert(index, point);
         }
 
         public bool Remove(WorldPoint point)
         {
             return points.Remove(point);
+        }
+
+        public void RemoveAt(int index)
+        {
+            points.RemoveAt(index);
         }
 
         //Returns the index of the closest point or line segment along with the distance
@@ -172,11 +198,6 @@ namespace WorldMaker
                 stretchBounds(value.X, value.Y);
                 points[index] = value;
             }
-        }
-
-        public void RemoveAt(int index)
-        {
-            points.RemoveAt(index);
         }
 
         public IEnumerator<WorldPoint> GetEnumerator()
