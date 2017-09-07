@@ -66,6 +66,8 @@ namespace WorldMaker.ui
         private List<WorldAction> actionList = new List<WorldAction>();
         private int actionIndex = 0;
 
+        WorldRectangle viewBounds = null;
+
         public WorldView()
         {
             InitializeComponent();
@@ -78,14 +80,15 @@ namespace WorldMaker.ui
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
-            
             if (world != null)
             {
+                viewBounds = new WorldRectangle(viewX - 1, viewY - 1, mouseToWorldX(Width) - viewX + 2, mouseToWorldY(Height) - viewY + 2);
+
+                //Draw Background
                 double worldWest = -viewX * zoomPercent / 100;
                 double worldEast = (world.Width - viewX) * zoomPercent / 100;
                 double worldNorth = -viewY * zoomPercent / 100;
                 double worldSouth = (world.Height - viewY) * zoomPercent / 100;
-
                 if (worldWest > 0) e.Graphics.FillRectangle(Brushes.LightGray, 0, 0, (int)worldWest, Height);
                 if (worldEast < Width) e.Graphics.FillRectangle(Brushes.LightGray, (int)worldEast, 0, (int)(Width - worldEast), Height);
                 if (worldNorth > 0) e.Graphics.FillRectangle(Brushes.LightGray, 0, 0, Width, (int)worldNorth);
@@ -140,13 +143,17 @@ namespace WorldMaker.ui
         {
             SolidBrush brush = new SolidBrush(pen.Color);
 
+            //Draw Rectangle around object
             WorldRectangle bounds = lineGraph.Bounds;
+            if (bounds.Left < viewBounds.Left) bounds.Left = viewBounds.Left;
+            if (bounds.Right > viewBounds.Right) bounds.Right = viewBounds.Right;
+            if (bounds.Top < viewBounds.Top) bounds.Top = viewBounds.Top;
+            if (bounds.Bottom > viewBounds.Bottom) bounds.Bottom = viewBounds.Bottom;
             Rectangle screenRect = worldToScreen(bounds);
             g.DrawRectangle(Pens.LightPink, screenRect);
 
+
             WorldPoint previous = null;
-            int previousScreenX = -1;
-            int previousScreenY = -1;
             foreach (WorldPoint point in lineGraph)
             {
                 double x = point.X;
@@ -156,34 +163,66 @@ namespace WorldMaker.ui
                     x += mouseWorldX - mouseDownWorldX;
                     y += mouseWorldY - mouseDownWorldY;
                 }
-                int screenX = worldToScreenX(x);
-                int screenY = worldToScreenY(y);
-                bool selected = selection.Contains(point);
-                try
-                {
-                    if (previous != null) g.DrawLine(pen, previousScreenX, previousScreenY, screenX, screenY);
-                }
-                catch (OverflowException) { }
-                if (selected) g.FillRectangle(selectedBrush, screenX - 1, screenY - 1, 3, 3);
-                else if (highlightDots) g.FillRectangle(brush, screenX - 1, screenY - 1, 3, 3);
 
-                previousScreenX = screenX;
-                previousScreenY = screenY;
+                bool selected = selection.Contains(point);
+
+
+                //Trim off the ends!
+                if(viewBounds.Contains(x, y))
+                {
+
+                }
+
+
+                if (previous != null)
+                {
+                    WorldPoint p1 = new WorldPoint(previous.X, previous.Y);
+                    WorldPoint p2 = new WorldPoint(x, y);
+                    DrawLine(g, pen, p1, p2);
+                }
+
+                //DrawPoint
+                if (viewBounds.Contains(x, y))
+                {
+                    int screenX = worldToScreenX(x);
+                    int screenY = worldToScreenY(y);
+                    if (selected) g.FillRectangle(selectedBrush, screenX - 1, screenY - 1, 3, 3);
+                    else if (highlightDots) g.FillRectangle(brush, screenX - 1, screenY - 1, 3, 3);
+                }
+
+                
+
                 previous = point;
             }
-            if (lineGraph.IsConnected && lineGraph.Count > 2)
-            {
-                double x = lineGraph[0].X;
-                double y = lineGraph[0].Y;
-                if (currentAction == ActionType.MoveSelection && selection.Contains(lineGraph[0]))
-                {
-                    x += mouseWorldX - mouseDownWorldX;
-                    y += mouseWorldY - mouseDownWorldY;
-                }
-                int screenX = worldToScreenX(x);
-                int screenY = worldToScreenY(y);
-                g.DrawLine(pen, previousScreenX, previousScreenY, screenX, screenY);
-            }
+            //if (lineGraph.IsConnected && lineGraph.Count > 2)
+            //{
+            //    double x = lineGraph[0].X;
+            //    double y = lineGraph[0].Y;
+            //    if (currentAction == ActionType.MoveSelection && selection.Contains(lineGraph[0]))
+            //    {
+            //        x += mouseWorldX - mouseDownWorldX;
+            //        y += mouseWorldY - mouseDownWorldY;
+            //    }
+            //    int screenX = worldToScreenX(x);
+            //    int screenY = worldToScreenY(y);
+
+
+
+            //    g.DrawLine(pen, previousScreenX, previousScreenY, screenX, screenY);
+            //}
+        }
+
+        private void DrawLine(Graphics g, Pen pen, WorldPoint p1, WorldPoint p2)
+        {
+            double dx = p2.X - p1.X;
+            double dy = p2.Y - p1.Y;
+
+            WorldRectangle.TrimLineSegment(p1, p2, viewBounds);
+            int screenX1 = worldToScreenX(p1.X);
+            int screenY1 = worldToScreenY(p1.Y);
+            int screenX2 = worldToScreenX(p2.X);
+            int screenY2 = worldToScreenY(p2.Y);
+            g.DrawLine(pen, screenX1, screenY1, screenX2, screenY2);
         }
 
         private void add(WorldAction action)

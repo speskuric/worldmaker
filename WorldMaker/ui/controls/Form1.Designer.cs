@@ -36,6 +36,7 @@
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripSelectModeButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripDrawModeButton = new System.Windows.Forms.ToolStripButton();
+            this.toolStripPointModeButton1 = new System.Windows.Forms.ToolStripButton();
             this.toolStripScrollButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripZoomButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
@@ -48,7 +49,6 @@
             this.RightToolStripPanel = new System.Windows.Forms.ToolStripPanel();
             this.LeftToolStripPanel = new System.Windows.Forms.ToolStripPanel();
             this.ContentPanel = new System.Windows.Forms.ToolStripContentPanel();
-            this.toolStripPointModeButton1 = new System.Windows.Forms.ToolStripButton();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -66,28 +66,28 @@
             this.editToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Padding = new System.Windows.Forms.Padding(9, 3, 0, 3);
-            this.menuStrip1.Size = new System.Drawing.Size(1334, 35);
+            this.menuStrip1.Size = new System.Drawing.Size(889, 24);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
             // fileToolStripMenuItem
             // 
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(50, 29);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "File";
             // 
             // editToolStripMenuItem
             // 
             this.editToolStripMenuItem.Name = "editToolStripMenuItem";
-            this.editToolStripMenuItem.Size = new System.Drawing.Size(54, 29);
+            this.editToolStripMenuItem.Size = new System.Drawing.Size(39, 20);
             this.editToolStripMenuItem.Text = "Edit";
             // 
             // splitContainer1
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer1.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
-            this.splitContainer1.Location = new System.Drawing.Point(0, 35);
+            this.splitContainer1.Location = new System.Drawing.Point(0, 24);
+            this.splitContainer1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.splitContainer1.Name = "splitContainer1";
             // 
             // splitContainer1.Panel1
@@ -98,8 +98,9 @@
             // 
             this.splitContainer1.Panel2.Controls.Add(this.worldView);
             this.splitContainer1.Panel2.Controls.Add(this.toolStrip2);
-            this.splitContainer1.Size = new System.Drawing.Size(1334, 927);
+            this.splitContainer1.Size = new System.Drawing.Size(889, 601);
             this.splitContainer1.SplitterDistance = 29;
+            this.splitContainer1.SplitterWidth = 3;
             this.splitContainer1.TabIndex = 2;
             // 
             // toolStrip1
@@ -117,7 +118,7 @@
             this.toolStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.VerticalStackWithOverflow;
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(29, 927);
+            this.toolStrip1.Size = new System.Drawing.Size(29, 601);
             this.toolStrip1.TabIndex = 0;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -142,6 +143,16 @@
             this.toolStripDrawModeButton.Size = new System.Drawing.Size(27, 28);
             this.toolStripDrawModeButton.Text = "Draw";
             this.toolStripDrawModeButton.Click += new System.EventHandler(this.toolStripDrawModeButton_Click);
+            // 
+            // toolStripPointModeButton1
+            // 
+            this.toolStripPointModeButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripPointModeButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripPointModeButton1.Image")));
+            this.toolStripPointModeButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripPointModeButton1.Name = "toolStripPointModeButton1";
+            this.toolStripPointModeButton1.Size = new System.Drawing.Size(27, 28);
+            this.toolStripPointModeButton1.Text = "Point Draw";
+            this.toolStripPointModeButton1.Click += new System.EventHandler(this.toolStripPointModeButton1_Click);
             // 
             // toolStripScrollButton
             // 
@@ -181,27 +192,29 @@
             // 
             this.worldView.Cursor = System.Windows.Forms.Cursors.Default;
             this.worldView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.worldView.Location = new System.Drawing.Point(0, 31);
+            this.worldView.Location = new System.Drawing.Point(0, 25);
+            this.worldView.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.worldView.Mode = WorldMaker.ui.enums.MouseMode.FreeDraw;
             this.worldView.Name = "worldView";
-            this.worldView.Size = new System.Drawing.Size(1301, 896);
+            this.worldView.Size = new System.Drawing.Size(857, 576);
             this.worldView.TabIndex = 0;
             // 
             // toolStrip2
             // 
+            this.toolStrip2.BackColor = System.Drawing.SystemColors.ControlLight;
             this.toolStrip2.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripTextBox1});
             this.toolStrip2.Location = new System.Drawing.Point(0, 0);
             this.toolStrip2.Name = "toolStrip2";
-            this.toolStrip2.Size = new System.Drawing.Size(1301, 31);
+            this.toolStrip2.Size = new System.Drawing.Size(857, 25);
             this.toolStrip2.TabIndex = 1;
             this.toolStrip2.Text = "toolStrip2";
             // 
             // toolStripTextBox1
             // 
             this.toolStripTextBox1.Name = "toolStripTextBox1";
-            this.toolStripTextBox1.Size = new System.Drawing.Size(100, 31);
+            this.toolStripTextBox1.Size = new System.Drawing.Size(250, 25);
             // 
             // BottomToolStripPanel
             // 
@@ -239,25 +252,14 @@
             // 
             this.ContentPanel.Size = new System.Drawing.Size(150, 150);
             // 
-            // toolStripPointModeButton1
-            // 
-            this.toolStripPointModeButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripPointModeButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripPointModeButton1.Image")));
-            this.toolStripPointModeButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripPointModeButton1.Name = "toolStripPointModeButton1";
-            this.toolStripPointModeButton1.Size = new System.Drawing.Size(27, 28);
-            this.toolStripPointModeButton1.Text = "Point Draw";
-            this.toolStripPointModeButton1.Click += new System.EventHandler(this.toolStripPointModeButton1_Click);
-            // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1334, 962);
+            this.ClientSize = new System.Drawing.Size(889, 625);
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
-            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.Name = "Form1";
             this.Text = "World Maker";
             this.menuStrip1.ResumeLayout(false);

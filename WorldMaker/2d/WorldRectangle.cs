@@ -13,7 +13,7 @@ namespace WorldMaker._2d
             get { return x; }
             set
             {
-                width += (value - x);
+                width += (x - value);
                 x = value;
             }
         }
@@ -23,7 +23,7 @@ namespace WorldMaker._2d
             get { return y; }
             set
             {
-                height += (value - y);
+                height += (y - value);
                 y = value;
             }
         }
@@ -67,8 +67,36 @@ namespace WorldMaker._2d
 
         public bool Contains(WorldPoint point)
         {
-            return Left <= point.X && point.X <= Right &&
-                Top <= point.Y && point.Y <= Bottom;
+            return Contains(point.X, point.Y);
+        }
+
+        public bool Contains(double X, double Y)
+        {
+            return Left <= X && X <= Right &&
+                Top <= Y && Y <= Bottom;
+        }
+
+        public static void TrimLineSegment(WorldPoint p1, WorldPoint p2, WorldRectangle viewBounds)
+        {
+            double dx = p2.X - p1.X;
+            double dy = p2.Y - p1.Y;
+
+            //Trim off Left
+            if (p1.X < viewBounds.Left && p2.X > viewBounds.Left)
+            {
+                double trimPercent = (viewBounds.Left - p1.X) / dx;
+                p1.X = viewBounds.Left;
+                if (dy != 0) p1.Y = p1.Y + dy * trimPercent;
+            }
+            else if (p1.X > viewBounds.Left && p2.X < viewBounds.Left)
+            {
+                double trimPercent = (viewBounds.Left - p2.X) / dx;
+                p2.X = viewBounds.Left;
+                if (dy != 0) p2.Y = p2.Y + dy * trimPercent;
+            }
+
+            //TRIM THE REST
+            // AND MAKE SURE THE RECTANGLES ARE ALSO TRIMMED CORRECTLY
         }
     }
 }
