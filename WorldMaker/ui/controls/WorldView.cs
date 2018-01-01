@@ -34,7 +34,7 @@ namespace WorldMaker.ui
 
         LineGraph currentLineGraph;
 
-        private World world = null;
+        public World World { get; set; } = null;
 
         ActionType currentAction = ActionType.None;
 
@@ -73,28 +73,28 @@ namespace WorldMaker.ui
             InitializeComponent();
             DoubleBuffered = true;
             ResizeRedraw = true;
-            world = new World(640,480);
+            World = new World(640,480);
             currentLineGraph = null;
         }
 
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
-            if (world != null)
+            if (World != null)
             {
                 viewBounds = new WorldRectangle(viewX - 1, viewY - 1, mouseToWorldX(Width) - viewX + 2, mouseToWorldY(Height) - viewY + 2);
 
                 //Draw Background
                 double worldWest = -viewX * zoomPercent / 100;
-                double worldEast = (world.Width - viewX) * zoomPercent / 100;
+                double worldEast = (World.Width - viewX) * zoomPercent / 100;
                 double worldNorth = -viewY * zoomPercent / 100;
-                double worldSouth = (world.Height - viewY) * zoomPercent / 100;
+                double worldSouth = (World.Height - viewY) * zoomPercent / 100;
                 if (worldWest > 0) e.Graphics.FillRectangle(Brushes.LightGray, 0, 0, (int)worldWest, Height);
                 if (worldEast < Width) e.Graphics.FillRectangle(Brushes.LightGray, (int)worldEast, 0, (int)(Width - worldEast), Height);
                 if (worldNorth > 0) e.Graphics.FillRectangle(Brushes.LightGray, 0, 0, Width, (int)worldNorth);
                 if (worldSouth < Height) e.Graphics.FillRectangle(Brushes.LightGray, 0, (int)worldSouth, Width, (int)(Height - worldSouth));
 
-                foreach (LineGraph line in world.Lines)
+                foreach (LineGraph line in World.Lines)
                 {
                     drawLineGraph(e.Graphics, line, false, Pens.Black);
                 }
@@ -133,8 +133,6 @@ namespace WorldMaker.ui
                     e.Graphics.DrawRectangle(pen, Math.Min(x1, x2), Math.Min(y1, y2), Math.Abs(x1 - x2), Math.Abs(y1 - y2));
                 }
             }
-            
-            
         }
 
 
@@ -150,7 +148,7 @@ namespace WorldMaker.ui
             if (bounds.Top < viewBounds.Top) bounds.Top = viewBounds.Top;
             if (bounds.Bottom > viewBounds.Bottom) bounds.Bottom = viewBounds.Bottom;
             Rectangle screenRect = worldToScreen(bounds);
-            g.DrawRectangle(Pens.LightPink, screenRect);
+            //g.DrawRectangle(Pens.LightPink, screenRect);
 
 
             WorldPoint previous = null;
@@ -192,24 +190,22 @@ namespace WorldMaker.ui
 
                 
 
-                previous = point;
+                previous = new WorldPoint(x,y);
             }
-            //if (lineGraph.IsConnected && lineGraph.Count > 2)
-            //{
-            //    double x = lineGraph[0].X;
-            //    double y = lineGraph[0].Y;
-            //    if (currentAction == ActionType.MoveSelection && selection.Contains(lineGraph[0]))
-            //    {
-            //        x += mouseWorldX - mouseDownWorldX;
-            //        y += mouseWorldY - mouseDownWorldY;
-            //    }
-            //    int screenX = worldToScreenX(x);
-            //    int screenY = worldToScreenY(y);
-
-
-
-            //    g.DrawLine(pen, previousScreenX, previousScreenY, screenX, screenY);
-            //}
+            if (lineGraph.IsConnected && lineGraph.Count > 2)
+            {
+                double x = lineGraph[0].X;
+                double y = lineGraph[0].Y;
+                if (currentAction == ActionType.MoveSelection && selection.Contains(lineGraph[0]))
+                {
+                    x += mouseWorldX - mouseDownWorldX;
+                    y += mouseWorldY - mouseDownWorldY;
+                }
+                //int screenX = worldToScreenX(x);
+                //int screenY = worldToScreenY(y);
+                DrawLine(g, pen, new WorldPoint(x, y), previous);
+                //g.DrawLine(pen, previous.X, previous.Y, screenX, screenY);
+            }
         }
 
         private void DrawLine(Graphics g, Pen pen, WorldPoint p1, WorldPoint p2)
@@ -244,7 +240,7 @@ namespace WorldMaker.ui
                 {
                     case ActionType.FreeDraw:
                     case ActionType.PointDraw:
-                        world.Lines.Remove(action.Line);
+                        World.Lines.Remove(action.Line);
                         break;
                     case ActionType.Delete:
                         for (int i = 0; i < action.Points.Count; i++)
@@ -274,7 +270,7 @@ namespace WorldMaker.ui
                 {
                     case ActionType.FreeDraw:
                     case ActionType.PointDraw:
-                        world.Lines.Add(action.Line);
+                        World.Lines.Add(action.Line);
                         break;
                     case ActionType.Delete:
                         for (int i = action.Points.Count - 1; i >= 0; i--)
@@ -461,9 +457,9 @@ namespace WorldMaker.ui
             {
                 WorldAction action = new WorldAction(ActionType.Delete, selection, selectionIndices);
                 add(action);
-                for (int i = 0; i < world.Lines.Count; i++)
+                for (int i = 0; i < World.Lines.Count; i++)
                 {
-                    LineGraph line = world.Lines[i];
+                    LineGraph line = World.Lines[i];
                     for (int j = 0; j < selection.Count; j++)
                     {
                         WorldPoint point = selection[j];
@@ -473,7 +469,7 @@ namespace WorldMaker.ui
                         }
                         
                     }
-                    if (line.Count <= 1) world.Lines.RemoveAt(i--);
+                    if (line.Count <= 1) World.Lines.RemoveAt(i--);
                     Invalidate();
                 }
             }
@@ -505,7 +501,7 @@ namespace WorldMaker.ui
             WorldPoint closestPoint = null;
             double lineDistance = selectionWorldDistance;
             LineGraph closestLine = null;
-            foreach (LineGraph line in world.Lines)
+            foreach (LineGraph line in World.Lines)
             {
                 bool isLine;
                 double distance;
@@ -563,7 +559,7 @@ namespace WorldMaker.ui
             double y1 = Math.Min(mouseDownWorldY, mouseWorldY);
             double y2 = Math.Max(mouseDownWorldY, mouseWorldY);
 
-            foreach (LineGraph graph in world.Lines)
+            foreach (LineGraph graph in World.Lines)
             {
                 for (int i = 0; i < graph.Count; i++)
                 {
@@ -641,7 +637,7 @@ namespace WorldMaker.ui
         {
             if (currentLineGraph != null && currentLineGraph.Count > 1)
             {
-                world.Lines.Add(currentLineGraph);
+                World.Lines.Add(currentLineGraph);
                 WorldAction action = new WorldAction(ActionType.FreeDraw, currentLineGraph);
                 add(action);
             }
@@ -673,7 +669,7 @@ namespace WorldMaker.ui
         private void pointDrawActionMouseRightDown(MouseEventArgs e)
         {
             if (currentLineGraph != null && currentLineGraph.Count > 1) {
-                world.Lines.Add(currentLineGraph);
+                World.Lines.Add(currentLineGraph);
                 WorldAction action = new WorldAction(ActionType.PointDraw, currentLineGraph);
                 add(action);
             }
